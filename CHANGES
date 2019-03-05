@@ -1,0 +1,11 @@
+python-pydrac - Dell iDRAC python interface
+===========================================
+
+Contact: Denis 'jawa' Pompilio <denis.pompilio@gmail.com>
+Sources: https://github.com/outini/python-pydrac
+
+=== v0.2.0 2019/03/05 ===
+    * Hardware inventory features
+
+=== v0.1.0 2018/10/19 ===
+    * Initial release of python-pydrac
