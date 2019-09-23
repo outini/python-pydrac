@@ -704,6 +704,7 @@ class RacAdm(object):
         """
         if self.ssh:
             self.ssh.logout()
+            self.ssh = None
 
     def r_exec(self, command, retry=3, ignoreerrors=False):
         """Execute command on the remote iDRAC
@@ -739,6 +740,8 @@ class RacAdm(object):
                     LOG.info("retrying command...")
             else:
                 break
+
+        self.logout()
 
         if output.startswith('ERROR: ') and not ignoreerrors:
             LOG.error("error running command: %s", command)
