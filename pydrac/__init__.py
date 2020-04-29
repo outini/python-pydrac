@@ -799,6 +799,13 @@ class RacAdm(object):
         # LOG.info(job_status)
         return job_status
 
+    def get_sel(self, severity=None):
+        """"""
+        for event in self.r_exec('getsel -o').splitlines():
+            e_date, e_time, e_src, e_sev, e_msg = event.split(None, 4)
+            if not severity or e_sev in severity:
+                yield " ".join([e_date, e_time, e_src, e_sev, e_msg])
+
 
 if __name__ == "__main__":
     print("racadm is designed to be imported")
