@@ -695,7 +695,7 @@ class RacAdm(object):
                 break
 
         self.ssh.setwinsize(10000, 10000)  # big window for big operations
-        self.ssh.PROMPT = '/admin1-> '
+        self.ssh.PROMPT = r'(/admin1-> |racadm>>).*'
         self.ssh.prompt()
         LOG.info("connected to %s" % self.conn['endpoint'])
 
@@ -731,12 +731,12 @@ class RacAdm(object):
             # command is echoed back, skip the first line
             output = "\n".join(output.splitlines()[1:]).strip()
             if output.startswith('ERROR: LC062 '):
-                LOG.info('profile export job is running... waiting')
+                LOG.debug('profile export job is running... waiting')
                 time.sleep(10)
             elif output.startswith('ERROR: '):
                 retry -= 1
                 if retry:
-                    LOG.info("retrying command...")
+                    LOG.debug("retrying command...")
             else:
                 break
 
