@@ -465,7 +465,8 @@ class RacAdmStorage(object):
         """
         controller = self.pdisks[0]['controller']
 
-        for pdisk in self.pdisks:
+        self.createvd('system', 'r1', self.pdisks[:2])
+        for pdisk in self.pdisks[2:]:
             self.createvd(pdisk['disk'], 'r0', [pdisk])
         self.racadm.run_jobs(controller, wait=True)
         self._vdisks = None
