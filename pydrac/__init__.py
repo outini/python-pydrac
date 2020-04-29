@@ -22,6 +22,7 @@
 Dell iDRAC python interface (python-pydrac)
 """
 
+import re
 import time
 import logging
 import socket
@@ -628,12 +629,100 @@ class RacAdmInventory(object):
             print(output)
 
 
+class RacAdmUpdates(object):
+    """"""
+    RE_JOB_ID = re.compile(r'JID_\d+')
+
+    def __init__(self, racadm_client):
+        """Initialization"""
+        self.racadm = racadm_client
+        self.repo_catalog = "Catalog.xml.gz"
+        self.repo_type = "HTTP"
+        self.repo_user = None
+        self.repo_password = None
+        self.data = None
+
+    def refresh_updates_list(self, repo_url, retry=3, ignoreerrors=False):
+        """"""
+        cmd = "update %s -f %s -e %s -a FALSE -t %s --verifycatalog"
+        repo_auth = ""
+        if self.repo_user and self.repo_password:
+            repo_auth = "-u %s -p %s" % (self.repo_user, self.repo_password)
+
+        LOG.info("checking updates from repository: %s", repo_url)
+        output = self.racadm.r_exec(
+            cmd % (repo_auth, self.repo_catalog, repo_url, self.repo_type),
+            retry, ignoreerrors
+        )
+        job_id = self.RE_JOB_ID.search(output).group()
+        job = self.racadm.get_job(job_id)
+        while job['status'] not in ['Completed', 'Failed']:
+            time.sleep(2)
+            job = self.racadm.get_job(job_id)
+        if job['status'] == 'Failed':
+            LOG.error("unable to refresh updates list")
+            return False
+        else:
+            LOG.info("updates list refreshed from repository: %s", repo_url)
+            return True
+
+    def load_report(self):
+        """Execute updates related command on the remote iDRAC
+
+        :param int retry: Retry count on error
+        :param bool ignoreerrors: Ignore returned errors
+        :return: available updates as :func:`list`
+        :rtype: str
+        """
+        if not self.data:
+            self.data = []
+            LOG.info("loading updates report")
+            output = self.racadm.r_exec('update viewreport',
+                                        retry=1, ignoreerrors=True)
+
+            if "ERROR: RAC1194: Successfully" in output:
+                return self.data
+
+            # ComponentType     = BIOS
+            # ElementName       = Dell EMC Server PowerEdge BIOS R740/...
+            # FQDD              = BIOS.Setup.1-1
+            # Current Version   = 2.3.10
+            # Available Version = 2.5.4
+            # ----------------------------------------------------------------
+
+            entry = collections.OrderedDict()
+            for line in output.splitlines():
+                if line.startswith('---------------'):
+                    self.data.append(entry)
+                    entry = collections.OrderedDict()
+                    continue
+                key_value = line.split("=", 1)
+                key = key_value[0].strip()
+                value = key_value[1].strip()
+                if key not in entry:
+                    entry[key] = value
+        return self.data
+
+    def show(self, c_types=None):
+        """"""
+        if not self.data:
+            self.load_report()
+        for entry in self.data:
+            if not c_types or entry['ComponentType'] in c_types:
+                for key, val in entry.items():
+                    if key == "ComponentType":
+                        print("%s: %s" % (key, val))
+                    else:
+                        print("    %s: %s" % (key, val))
+
+
 class RacAdm(object):
     """"""
     capabilities = {
         'raid': RacAdmStorage,
         'bios': RacAdmBios,
-        'inventory': RacAdmInventory
+        'inventory': RacAdmInventory,
+        'updates': RacAdmUpdates
     }
 
     def __init__(self, idrac_conn, force_password=False):
