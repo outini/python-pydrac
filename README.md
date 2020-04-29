@@ -21,7 +21,7 @@ python setup.py install
 
 To be documented
 
-## Exemples
+## Examples
 
 Basic initialization:
 ```python
@@ -43,6 +43,57 @@ radm.inventory.show()
 
 # Reset the server
 radm.serveraction("reset")
+```
+
+More complete report:
+```python
+import pydrac
+
+IDRAC_USER = "root"
+IDRAC_PASSWORD = "calvin"
+
+
+idrac = {
+    'endpoint': "idrac-x0x0x0x0.oob.corp.net",
+    'user': IDRAC_USER,
+    'password': IDRAC_PASSWORD
+}
+radm = pydrac.RacAdm(idrac)
+
+try:
+    print("--- Inventory ----------------------")
+    radm.inventory.show()
+
+    print("--- iDRAC Configuration ---------")
+    print("Network configuration:")
+    print("    DHCPEnable: %s" % (radm.bios.idrac_ipv4['DHCPEnable']))
+    print("    Address: %s" % (radm.bios.idrac_ipv4['Address']))
+    print("    Netmask: %s" % (radm.bios.idrac_ipv4['Netmask']))
+    print("    Gateway: %s" % (radm.bios.idrac_ipv4['Gateway']))
+    print("    DNS1: %s" % (radm.bios.idrac_ipv4['DNS1']))
+    print("    DNS2: %s" % (radm.bios.idrac_ipv4['DNS2']))
+
+    print("\n--- BIOS Settings ------------------")
+    print("Boot settings:")
+    print("    BootMode: %s" % (radm.bios.bios_boot_settings['BootMode']))
+    print("    BootSeq: %s" % (radm.bios.bios_boot_settings['BootSeq']))
+    print("    UefiBootSeq: %s" % (
+        radm.bios.bios_boot_settings['UefiBootSeq']))
+    print("System profile settings:")
+    print("    SysProfile: %s" % (
+        radm.bios.sys_profile_settings['SysProfile']))
+
+    print("\n--- Updates ------------------------")
+    radm.updates.repo_type = "HTTPS"
+    radm.updates.refresh_updates_list('downloads.dell.com')
+    radm.updates.show(['Firmware', 'BIOS'])
+
+    print("\n--- Events -------------------------")
+    for event in radm.get_sel(severity=["Critical", "Non-Critical"]):
+        print(event)
+
+finally:
+    radm.logout()
 ```
 
 ## License
