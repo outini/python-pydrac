@@ -620,7 +620,7 @@ class RacAdmInventory(object):
                     output += "\n        %s %s %s (%s %s) - %d GB" % (
                         disk['DriveFormFactor'],
                         disk['MediaType'],
-                        disk['SerialNumber'],
+                        disk.get('SerialNumber', 'n/a'),
                         disk['Manufacturer'],
                         disk['Model'],
                         int(disk['SizeInBytes'].split()[0]) / 1073741824
