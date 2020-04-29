@@ -74,7 +74,6 @@ class RacAdmRegistry(dict):
         super().update(**self._output_to_dict(out))
 
     def __getitem__(self, k):
-        print('__getitem__', k)
         try:
             return self.changes.__getitem__(k)
         except KeyError:
