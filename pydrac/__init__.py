@@ -769,7 +769,7 @@ class RacAdm(object):
 
         if wait:
             LOG.info("waiting job %s completion", jid)
-            while self.get_job(jid)['status'] != 'Completed':
+            while self.get_job(jid)['status'] not in ['Completed', 'Failed']:
                 time.sleep(2)
 
         return jid
