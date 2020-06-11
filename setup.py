@@ -24,7 +24,7 @@ import setuptools
 
 if __name__ == '__main__':
     readme_file = os.path.join(os.path.dirname(__file__), 'README.md')
-    release = "0.2.0"
+    release = "0.2.1"
     setuptools.setup(
         name="python-pydrac",
         version=release,
@@ -34,7 +34,7 @@ if __name__ == '__main__':
         maintainer="Denis Pompilio (jawa)",
         maintainer_email="denis.pompilio@gmail.com",
         description="Dell iDRAC python interface",
-        long_description=open(readme_file).read(),
+        long_description=open(readme_file, encoding='utf-8').read(),
         long_description_content_type='text/markdown',
         license="MIT",
         platforms=['UNIX'],
@@ -53,5 +53,6 @@ if __name__ == '__main__':
             'Programming Language :: Python :: 3',
             'Topic :: Utilities',
             ],
-        requires=['pexpect']
+        requires=['pexpect'],
+        install_requires=['pexpect']
     )
